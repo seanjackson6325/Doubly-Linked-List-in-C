@@ -4,6 +4,16 @@ An efficient doubly linked list structure for C/C++. Features include:
 - The ability to traverse from the head or tail of the list
 - Iterator structure that can be used for efficient traversing (and adding and removing in constant time complexity).
 
+## Header Files:
+
+#### dl_list.h
+
+- Include this to get access to DL_List data type and functions
+
+#### dl_iter.h
+
+- Include this to get access to DL_Iter data type and functions
+
 ## Data types:
 
 #### DL_List
