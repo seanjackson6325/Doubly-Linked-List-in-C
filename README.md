@@ -57,4 +57,4 @@ An efficient doubly linked list structure for C/C++
 
 #### void* DL_List__RemoveFromTail(DL_List* list);
 - Remove a node from the end (tail) of the list
-// The value of the removed node is returned
+- The value of the removed node is returned
