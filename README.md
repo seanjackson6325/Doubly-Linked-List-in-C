@@ -116,3 +116,66 @@ An efficient doubly linked list structure for C/C++. Features include:
 
 #### int DL_Iter__GetIndex(DL_Iter*);
 - Get the current index of the iterator
+
+## Examples:
+
+  #include "dl_list.h"
+  #include "dl_iter.h"
+  #include <stdio.h>
+  
+  int main()
+  {
+  	// create an array of 10 numbers to add to list
+  	int nums[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+  	int nums_len = 10;
+  
+  	// new doubly linked list
+  	DL_List list;
+  	// initialize list
+  	DL_List__Init(&list);
+  
+  	// loop through array, add each to end of linked list
+  	for (int i = 0; i < nums_len; i++)
+  	{
+  		DL_List__AddToTail(&list, &nums[i]);
+  	}
+  
+  	// create a new iterator
+  	DL_Iter iter;
+  	// initialize the iterator to start at head of linked list
+  	DL_Iter__Init(&iter, &list, DL_ITER_HEAD);
+  
+  	// use iterator to iterate through list
+  	// print out each value
+  	while (DL_Iter__HasNext(&iter))
+  	{
+  		int* val = (int*) DL_Iter__GetVal(&iter);
+  		printf("%d\n", *val);
+  		DL_Iter__Next(&iter);
+  	}
+  
+  	// set iterator back to head of list
+  	DL_Iter__ToHead(&iter);
+  
+  	// add another value at the beginning of list
+  	DL_Iter__Add(&iter, &nums[0]);
+  	// move iterator ahead two places in list
+  	DL_Iter__Next(&iter);
+  	DL_Iter__Next(&iter);
+  	// add a new value at the iterator position
+  	DL_Iter__Add(&iter, &nums[1]);
+  
+  	// set iterator to tail of linked list
+  	DL_Iter__ToTail(&iter);
+  
+  	printf("\n\n");
+  
+  	// use iterator to iterate backwards through list
+  	// print out each value
+  	while (DL_Iter__HasPrev(&iter))
+  	{
+  		int* val = (int*)DL_Iter__GetVal(&iter);
+  		printf("%d\n", *val);
+  		DL_Iter__Prev(&iter);
+  	}
+  }
