@@ -58,3 +58,48 @@ An efficient doubly linked list structure for C/C++
 #### void* DL_List__RemoveFromTail(DL_List* list);
 - Remove a node from the end (tail) of the list
 - The value of the removed node is returned
+
+## Functions for DL_Iter:
+
+#### void DL_Iter__Init(DL_Iter* iter, DL_List* list, bool start);
+- Initialize a list iterator
+
+
+#### void DL_Iter__Next(DL_Iter*);
+- Move iterator to next node
+
+
+#### void DL_Iter__Prev(DL_Iter*);
+- Move iterator to previous node
+
+
+#### void DL_Iter__ToHead(DL_Iter*);
+- Move iterator to head of list
+
+
+#### void DL_Iter__ToTail(DL_Iter*);
+- Move iterator to tail of list
+
+
+#### bool DL_Iter__HasNext(DL_Iter*);
+- Check if node after current position exists
+
+
+#### bool DL_Iter__HasPrev(DL_Iter*);
+- Check if node before current position exists
+
+
+#### void* DL_Iter__Add(DL_Iter*, void* val);
+- Add a value at the position of the iterator
+
+
+#### void* DL_Iter__Remove(DL_Iter*);
+- Remove a value at the position of the iterator
+
+
+#### void* DL_Iter__GetVal(DL_Iter*);
+- Return the value at the position of the iterator
+
+
+#### int DL_Iter__GetIndex(DL_Iter*);
+- Get the current index of the iterator
