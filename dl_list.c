@@ -1,149 +1,182 @@
 /****************************************************************
 *
 * Author: Sean Jackson
-* Description: Source file for linked list struct and functions
+* Description: Source file for list and node structs and functions
 * Last Modified: 03/19/22
 *
 ****************************************************************/
 
 #include "dl_list.h"
-#include "dl_iter.h"
+#include <stdio.h>
 
 /////////////////////////////////////////////////////////////////
 
-// create new DL_Node on heap
-DL_Node* DL_Node__Create(void* val, DL_Node* prev, DL_Node* next)
+
+// Initialize a new DL_List
+void DL_List__Init(DL_List* list)
+{
+	list->head = list->tail = NULL;
+	list->length = 0;
+}
+
+// Add a value at position i in the list
+bool DL_List__Add(DL_List* list, void* val, int i)
+{
+	if (i <= 0)
+		return DL_List__AddToHead(list, val);
+	if (i >= list->length)
+		return DL_List__AddToTail(list, val);
+
+	DL_Node* node = malloc(sizeof(DL_Node));
+	if (node)
+	{
+		node->val = val;
+
+		DL_Node* current = list->head;
+		while (i > 0)
+		{
+			current = current->next;
+			i--;
+		}
+
+		node->next = current;
+		node->prev = current->prev;
+		current->prev->next = node;
+		current->prev = node;
+		
+		list->length++;
+		return true;
+	}
+	return false;
+}
+
+
+// Remove a node at position i
+// The value of the node is returned
+void* DL_List__Remove(DL_List* list, int i)
+{
+	if (i <= 0)
+		return DL_List__RemoveFromHead(list);
+	if (i >= list->length)
+		return DL_List__RemoveFromTail(list);
+
+	if (!list->length)
+		return NULL;
+	else
+	{
+		DL_Node* current = list->head;
+		while (i > 0)
+		{
+			current = current->next;
+			i--;
+		}
+		
+		current->prev->next = current->next;
+		current->next->prev = current->prev;
+
+		void* val = current->val;
+		free(current);
+		list->length--;
+		return val;
+	}
+}
+
+
+// Add a new node to the head of the list
+bool DL_List__AddToHead(DL_List* list, void* val)
 {
 	DL_Node* node = malloc(sizeof(DL_Node));
-	if (node != NULL)
+	if (node)
 	{
-		*node = (DL_Node)
+		node->prev = NULL;
+		node->next = list->head;
+		node->val = val;
+
+		if (!list->length)
+			list->tail = node;
+		else
 		{
-			.prev = prev,
-			.next = next,
-			.val = val,
-		};
-	}
-}
-
-// destroy node
-void DL_Node__Destroy(DL_Node* node, void (*destroy_val)(void*))
-{
-	if (node != NULL)
-	{
-		destroy_val(node->val);
-		free(node);
-	}
-}
-
-// create new DL_List on heap
-DL_List* DL_List__Create()
-{
-	DL_List* list = malloc(sizeof(DL_List));
-	if (list != NULL)
-	{
-		*list = (DL_List)
-		{
-			.head = NULL,
-			.length = 0
-		};
-	}
-	return list;
-}
-
-// destroy DL_List
-// this does not destroy the values stored in the nodes
-// it just destroys the memory used by the nodes themselves
-void DL_List__Destroy(DL_List* list, void (*destroy_val)(void*))
-{
-	if (list->head != NULL)
-	{
-		DL_Node* node = list->head;
-
-		while (node->next != NULL)
-		{
-			DL_Node* save = node->next;
-			DL_Node__Destroy(node, destroy_val);
-			node = save;
+			list->head->prev = node;
 		}
-	}
-	return NULL;
-}
-
-/////////////////////////////////////////////////////////////////
-
-// add a DL_Node to the end of a DL_List
-void DL_List__AddToEnd(DL_List* list, void* val)
-{
-	if (list->head == NULL)
-	{
-		list->head = DL_Node__Create(val, NULL, NULL);
-	}
-	else
-	{
-		DL_Node* node = list->head;
-
-		while (node->next != NULL)
-		{
-			node = node->next;
-		}
-		node->next = DL_Node__Create(val, node, NULL);
-	}
-}
-
-// remove node from end of list
-// returns value of end of list if list isn't empty
-// returns NULL if list is empty
-void DL_List__RemoveFromEnd(DL_List* list, void* val, void (*destroy_type)(void*))
-{
-	if (list->head != NULL)
-	{
-		DL_Node* node = list->head;
-
-		while (node->next != NULL)
-		{
-			node = node->next;
-		}
-		node->prev->next = NULL;
-		DL_Node__Destroy(val, destroy_type);
-	}
-}
-
-// add a DL_Node to the front of a DL_List
-void DL_List__AddToFront(DL_List* list, void* val)
-{
-	if (list->head == NULL)
-	{
-		list->head = DL_Node__Create(val, NULL, NULL);
-	}
-	else
-	{
-		DL_Node* node = DL_Node__Create(val, NULL, list->head);
-		list->head->prev = node;
+		
 		list->head = node;
+		list->length++;
+		return true;
 	}
+	return false;
 }
 
-// remove node from front of list
-// returns value of head of list if list isn't empty
-// returns NULL if list is empty
-void DL_List__RemoveFromFront(DL_List* list, void* val, void (*destroy_type)(void*))
+
+// Remove the first node (head) from the list
+// The value of the removed node is returned
+void* DL_List__RemoveFromHead(DL_List* list)
 {
-	if (list->head != NULL)
+	if (!list->length)
+		return NULL;
+	else
 	{
-		DL_Node* head = list->head;
-		list->head = list->head->next;
-		list->head->prev = NULL;
-		DL_Node__Destroy(head, destroy_type);
+		DL_Node* temp = list->head;
+		if (list->length == 1)
+			list->tail = list->head = NULL;
+		else
+		{
+			temp->next->prev = NULL;
+			list->head = temp->next;
+		}
+
+		void* val = temp->val;
+		free(temp);
+		list->length--;
+		return val;
 	}
 }
 
-/////////////////////////////////////////////////////////////////
 
-// get the current size of the list
-size_t DL_List__Length(DL_List* list)
+// Add a new node to the tail of the list
+bool DL_List__AddToTail(DL_List* list, void* val)
 {
-	return list->length;
+	DL_Node* node = malloc(sizeof(DL_Node));
+	if (node)
+	{
+		node->prev = list->tail;
+		node->next = NULL;
+		node->val = val;
+		
+		if (!list->length)
+			list->head = node;
+		else
+			list->tail->next = node;
+		
+		list->tail = node;
+		list->length++;
+		return true;
+	}
+	return false;
+}
+
+
+// Remove a node from the end (tail) of the list
+// The value of the removed node is returned
+void* DL_List__RemoveFromTail(DL_List* list)
+{
+	if (!list->length)
+		return NULL;
+	else
+	{
+		DL_Node* temp = list->tail;
+		if (list->length == 1)
+			list->head = list->tail = NULL;
+		else
+		{
+			temp->prev->next = NULL;
+			list->tail = temp->prev;
+		}
+
+		void* val = temp->val;
+		free(temp);
+		list->length--;
+		return val;
+	}
 }
 
 /////////////////////////////////////////////////////////////////
