@@ -1,5 +1,8 @@
 # Doubly-Linked-List-in-C
-An efficient doubly linked list structure for C/C++
+An efficient doubly linked list structure for C/C++. Features include:
+- Efficient adding and removing
+- The ability to traverse from the head or tail of the list
+- Iterator structure that can be used for efficient traversing (and adding and removing in constant time complexity).
 
 ## Data types:
 
